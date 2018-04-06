@@ -1,0 +1,312 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <title>Comme un Rock !</title>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css"
+      integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm"
+      crossorigin="anonymous">
+    <style media="screen">
+      .board {
+        margin: 0px;
+        top: 0;
+        left: 0;
+        height: 100%;
+        width: 100%;
+      }
+
+      #scoreDisplay {
+        position: absolute;
+        left: 50%;
+        min-width: 200px;
+        margin-left: -100px;
+        z-index: 3;
+        text-align: center;
+      }
+
+      .arrow {
+        position: absolute;
+        top: 0%;
+        left: 50%;
+        margin-left: -16em;
+        margin-top: -3.5em;
+        z-index: 2;
+        text-align: center;
+      }
+
+      .arrowTarget {
+        top: 75%;
+        z-index: 1;
+      }
+
+      .arrowUp {
+        margin-left: -8em;
+      }
+
+      .arrowDown {
+        margin-left: 0em;
+      }
+
+      .arrowRight {
+        margin-left: 8em;
+      }
+
+      .floorTile {
+        position: absolute;
+        border: 1px solid #474747;
+        min-width: 50px;
+        min-height: 50px;
+      }
+    </style>
+  </head>
+  <body onload="init()">
+    <div class="container">
+      <div class="card" id="scoreDisplay">
+        <div class="card-body" id="scoreDisplayText">
+          tesdt
+        </div>
+      </div>
+
+      <div class="board" id="danceFloor"></div>
+      <div class="board" id="gameBoard">
+        <div class="arrow arrowTarget" id="arrowTargetLeft" onmousedown="handleLeftTarget()">
+          <i class="fas fa-arrow-circle-left fa-7x"></i>
+        </div>
+        <div class="arrow arrowUp arrowTarget" id="arrowTargetUp" onclick="handleUpTarget()">
+          <i class="fas fa-arrow-circle-up fa-7x"></i>
+        </div>
+        <div class="arrow arrowDown arrowTarget" id="arrowTargetDown" onclick="handleDownTarget()">
+          <i class="fas fa-arrow-circle-down fa-7x"></i>
+        </div>
+        <div class="arrow arrowRight arrowTarget" id="arrowTargetRight" onclick="handleRightTarget()">
+          <i class="fas fa-arrow-circle-right fa-7x"></i>
+        </div>
+      </div>
+    </div>
+
+    <script defer src="https://use.fontawesome.com/releases/v5.0.9/js/all.js"
+      integrity="sha384-8iPTk2s/jMVj81dnzb/iFR2sdA7u06vHJyyLlAd4snFpCl/SnyUjRrbdJsw1pGIl"
+      crossorigin="anonymous"></script>
+    <script type="text/javascript">
+      // Length of the game in seconds
+      var timer = 30000;
+      // The score of the current game
+      var score = 0;
+
+      // List of faaling arrow
+      var arrows = [];
+
+      // Allow turning on/off the blinking of the dance floor
+      var floorBlink = true;
+      // Allow turning on/off the falling of arrows
+      var arrowFall = true;
+      // The size of a tile on the dance floor
+      var tileSize = 50;
+
+      // A reference to the intervall calling of generateDanceFloor
+      var danceFloorGeneratorRef;
+      // A reference to the intervall calling of handleAnimArrow
+      var animArrowRef;
+
+      // List of color of a tile on the dance floor
+      var colorFloor = ["#1bfc48", "#1bcffc", "#fc1bcf", "#fc481b"];
+      // Color of tile when game ended
+      var colorFloorOff = "#303030";
+
+      // Initialize the game
+      function init() {
+        generateDanceFloor(true);
+        danceFloorGeneratorRef = window.setInterval(danceFloorGenerator, 1000);
+        animArrowRef = window.setInterval(handleAnimArrow, 20);
+        document.getElementById('scoreDisplayText').innerHTML = score + "pts";
+        window.setTimeout(endGame, timer);
+      }
+
+      // End the current game
+      function endGame() {
+        floorBlink = false;
+        arrowFall = false;
+
+        var t = document.getElementsByClassName('animated');
+        for (var i = 0; i < t.length; i++) {
+          t[i].remove();
+        }
+
+        alert("Your final score is " + score + " points");
+      }
+
+      // Check if arrow on target left
+      function handleLeftTarget() {
+        var target = document.getElementById('arrowTargetLeft');
+        var t = document.getElementsByClassName('animated arrowLeft');
+        for (var i = 0; i < t.length; i++) {
+          var yFall = t[i].offsetTop;
+          var hFall = t[i].clientHeight;
+
+          var yTarget = target.offsetTop;
+          var hTarget = target.clientHeight;
+
+          if ( yFall <= yTarget + hTarget
+            && yFall + hFall >= yTarget) {
+            t[i].remove();
+            score += 100;
+            document.getElementById('scoreDisplayText').innerHTML = score + "pts";
+          }
+        }
+      }
+
+      // Check if arrow on target up
+      function handleUpTarget() {
+        var target = document.getElementById('arrowTargetUp');
+        var t = document.getElementsByClassName('animated arrowUp');
+        for (var i = 0; i < t.length; i++) {
+          var yFall = t[i].offsetTop;
+          var hFall = t[i].clientHeight;
+
+          var yTarget = target.offsetTop;
+          var hTarget = target.clientHeight;
+
+          if ( yFall <= yTarget + hTarget
+            && yFall + hFall >= yTarget) {
+            t[i].remove();
+            score += 100;
+            document.getElementById('scoreDisplayText').innerHTML = score + "pts";
+          }
+        }
+      }
+
+      // Check if arrow on target down
+      function handleDownTarget() {
+        var target = document.getElementById('arrowTargetDown');
+        var t = document.getElementsByClassName('animated arrowDown');
+        for (var i = 0; i < t.length; i++) {
+          var yFall = t[i].offsetTop;
+          var hFall = t[i].clientHeight;
+
+          var yTarget = target.offsetTop;
+          var hTarget = target.clientHeight;
+
+          if ( yFall <= yTarget + hTarget
+            && yFall + hFall >= yTarget) {
+            t[i].remove();
+            score += 100;
+            document.getElementById('scoreDisplayText').innerHTML = score + "pts";
+          }
+        }
+      }
+
+      // Check if arrow on target right
+      function handleRightTarget() {
+        var target = document.getElementById('arrowTargetRight');
+        var t = document.getElementsByClassName('animated arrowRight');
+        for (var i = 0; i < t.length; i++) {
+          var yFall = t[i].offsetTop;
+          var hFall = t[i].clientHeight;
+
+          var yTarget = target.offsetTop;
+          var hTarget = target.clientHeight;
+
+          if ( yFall <= yTarget + hTarget
+            && yFall + hFall >= yTarget) {
+            t[i].remove();
+            score += 100;
+            document.getElementById('scoreDisplayText').innerHTML = score + "pts";
+          }
+        }
+      }
+
+      // Call the generation of the dance floor every second
+      function danceFloorGenerator() {
+        if (floorBlink) {
+          switchColor(true);
+          generateArrow();
+        } else {
+          window.clearInterval(danceFloorGeneratorRef);
+          switchColor(false);
+        }
+      }
+
+      // Allow animation of falling arrow
+      function handleAnimArrow() {
+        if (arrowFall) {
+          var t = document.getElementsByClassName('animated');
+          for (var i = 0; i < t.length; i++) {
+            var posRaw = t[i].style.top;
+            var pos = parseInt(posRaw.substring(0, posRaw.length - 1));
+
+            if (posRaw == "")
+              pos = 1;
+            else
+              pos += 1;
+
+            if (pos > 100)
+              t[i].remove()
+            else
+              t[i].style.top = pos + "%";
+          }
+        } else {
+          window.clearInterval(animArrowRef);
+        }
+      }
+
+      // Generate a new arrow
+      function generateArrow() {
+        // 0 = left, 1 = up, 2 = down, 3 = right
+        var side = Math.floor(Math.random() * 4);
+        var gameBoard = document.getElementById('gameBoard');
+
+        switch (side) {
+          case 0:
+            gameBoard.innerHTML += "<div class='arrow arrowLeft animated'>"
+              + "<i class='fas fa-arrow-left fa-7x'></i>"
+              + "</div>";
+            break;
+
+          case 1:
+            gameBoard.innerHTML += "<div class='arrow arrowUp animated'>"
+              + "<i class='fas fa-arrow-up fa-7x'></i>"
+              + "</div>";
+            break;
+
+          case 2:
+            gameBoard.innerHTML += "<div class='arrow arrowDown animated'>"
+              + "<i class='fas fa-arrow-down fa-7x'></i>"
+              + "</div>";
+            break;
+
+          default:
+            gameBoard.innerHTML += "<div class='arrow arrowRight animated'>"
+              + "<i class='fas fa-arrow-right fa-7x'></i>"
+              + "</div>";
+        }
+      }
+
+      // Generate the dance floor
+      function generateDanceFloor() {
+        var height = window.innerHeight;
+        var width = window.innerWidth;
+
+        for (var y = 0; y < height / tileSize; y++) {
+          for (var x = 0; x < width / tileSize; x++) {
+            document.getElementById('danceFloor').innerHTML += '<div class="floorTile" style="'
+              + 'top: ' + (y * tileSize) + 'px;'
+              + 'left: ' + (x * tileSize) + 'px;'
+              + 'background-color: ' + colorFloorOff + ';'
+              + '"></div>';
+          }
+        }
+      }
+
+      // Circle color of dance
+      function switchColor(light = true) {
+        var t = document.getElementsByClassName('floorTile');
+
+        for (var i = 0; i < t.length; i++) {
+          var randColor = Math.floor(Math.random() * colorFloor.length);
+          var color = (light) ? colorFloor[randColor] : colorFloorOff;
+          t[i].style.backgroundColor = color;
+        }
+      }
+    </script>
+  </body>
+</html>
